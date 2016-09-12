@@ -94,12 +94,4 @@ describe('proxy-request', function () {
       });
     });
   });
-
-  it('modifyResponse not function throw error', function () {
-    assert.throws(() => proxy({readable: true}, {modifyResponse: 1}), Error)
-  });
-
-  it('modifyResponse not function throw error', function () {
-    assert.throws(() => proxy({readable: false}), Error);
-  });
 });
