@@ -1,33 +1,105 @@
 const assert = require('assert');
-const http = require('http');
-const server = require('./server');
+const utils = require('./utils');
 const proxy = require('../lib');
 
 describe('proxy-request', function () {
-  it('should proxy with res', function (done) {
-    const s = server.createMockServer();
-
-    http.createServer((req, res) => {
-      s.listen(s.port, function() {
-        proxy(req, {url: `http://localhost:${this.address().port}`}, res)
-      })
-    }).listen(0, function() {
-      const get = http.get({
-        path: '/',
-        host: 'localhost',
-        port: this.address().port
-      }, function(res) {
+  it('proxy(req, {url}, res)', function (done) {
+    utils.test(function(req, res) {
+      proxy(req, {url: `http://localhost:${this.address().port}`}, res)
+    }, function() {
+      const ctx = this;
+      utils.get.call(this, null, function(res, body) {
         assert.equal(res.statusCode, 200);
-        let data = '';
-        res.setEncoding('utf8')
-        res.on('data', (chunk) => data += chunk);
-        res.on('end', () => {
-          assert.equal(data, s.successText);
-          done()
-        });
+        assert.equal(body, ctx.s.successText);
+        done()
       });
-      get.on('error', (e) => {throw e;});
-      get.end();
     });
+  });
+
+  it('proxy(req, {url}).then(request => request.pipe(res))', function (done) {
+    utils.test(function(req, res) {
+      proxy(req, {url: `http://localhost:${this.address().port}`})
+        .then(request => request.pipe(res));
+    }, function() {
+      const ctx = this;
+      utils.get.call(this, null, function(res, body) {
+        assert.equal(res.statusCode, 200);
+        assert.equal(body, ctx.s.successText);
+        done()
+      });
+    });
+  });
+
+  it('proxy(req, {url, modifyResponse}, res)', function (done) {
+    const MODIFIED = 'modified';
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(body) {
+          assert.equal(body, ctx.s.successText);
+          this.response.statusCode = 206;
+          this.response.headers.test = 'test';
+          return MODIFIED;
+        }
+      }, res);
+    }, function() {
+      utils.get.call(this, null, function(res, body) {
+        assert.equal(res.statusCode, 206);
+        assert.equal(body, MODIFIED);
+        assert.equal(res.headers.test, 'test');
+        done()
+      });
+    });
+  });
+
+  it('proxy(req, {url, modifyResponse}).then(request => request.pipe(res))', function (done) {
+    const MODIFIED = 'modified';
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(body) {
+          assert.equal(body, ctx.s.successText);
+          this.response.statusCode = 206;
+          this.response.headers.test = 'test';
+          return MODIFIED;
+        }
+      }).then(request => request.pipe(res));
+    }, function() {
+      utils.get.call(this, null, function(res, body) {
+        assert.equal(res.statusCode, 206);
+        assert.equal(body, MODIFIED);
+        assert.equal(res.headers.test, 'test');
+        done()
+      });
+    });
+  });
+
+  it('proxy(req, {url}, res).then(request => request.on("response", fn))', function (done) {
+    utils.test(function(req, res) {
+      proxy(req, {url: `http://localhost:${this.address().port}`}, res)
+        .then(request => {
+          request.on('response', (response) => {
+            response.headers.test = 'test';
+          });
+        });
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.statusCode, 200);
+        assert.equal(body, ctx.s.successText);
+        assert.equal(res.headers.test, 'test');
+        done()
+      });
+    });
+  });
+
+  it('modifyResponse not function throw error', function () {
+    assert.throws(() => proxy({readable: true}, {modifyResponse: 1}), Error)
+  });
+
+  it('modifyResponse not function throw error', function () {
+    assert.throws(() => proxy({readable: false}), Error);
   });
 });
