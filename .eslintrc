@@ -1,0 +1,17 @@
+{
+  "extends": "eslint:recommended",
+  "ecmaFeatures": {
+    "classes": true
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "commonjs": true,
+    "amd": true,
+    "mocha": true,
+    "es6": true
+  },
+  "rules": {
+    "indent": [2, 2]
+  }
+}
