@@ -32,13 +32,20 @@ const http = require('http');
 
 // http useage
 http.createServer((req, res) => {
-  proxy(req, {url: `http://www.google.com${req.url}`}, res);
+  proxy(req, {url: `http://www.google.com${req.url}`}, res)
+    .then(request => {
+      request.on('response', (response) => {
+        // A chance to change response headers before pipe
+        response.headers.test = 'test';
+      });
+    });
 }).listen(8000);
 
 // koa middleware
 function* koaProxy(next) {
   const req = yield proxy(this.req, {url: `http://www.google.com${this.req.url}`});
   req.on('response', function(response) {
+    // A chance to change response headers before pipe
     this.headers = response.headers;
   });
   this.body = req;
@@ -63,7 +70,13 @@ http.createServer((req, res) => {
       // use new content, must be string or buffer;
       return JSON.stringify({content: body});
     }
-  }, res);
+  }, res)
+    .then(request => {
+      request.on('response', (response) => {
+        // A chance to change response headers before pipe
+        response.headers.test = 'test';
+      });
+    });
 }).listen(8000);
 ```
 
