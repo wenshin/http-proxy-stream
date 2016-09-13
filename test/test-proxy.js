@@ -36,11 +36,11 @@ describe('proxy-request', function () {
       const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
-        modifyResponse(body) {
-          assert.equal(body, ctx.s.successText);
-          this.response.statusCode = 206;
-          this.response.headers.test = 'test';
-          return MODIFIED;
+        modifyResponse(response) {
+          assert.equal(response.body, ctx.s.successText);
+          response.statusCode = 206;
+          response.headers.test = 'test';
+          response.body = MODIFIED;
         }
       }, res);
     }, function() {
@@ -59,11 +59,11 @@ describe('proxy-request', function () {
       const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
-        modifyResponse(body) {
-          assert.equal(body, ctx.s.successText);
-          this.response.statusCode = 206;
-          this.response.headers.test = 'test';
-          return MODIFIED;
+        modifyResponse(response) {
+          assert.equal(response.body, ctx.s.successText);
+          response.statusCode = 206;
+          response.headers.test = 'test';
+          response.body = MODIFIED;
         }
       }).then(request => request.pipe(res));
     }, function() {
@@ -101,11 +101,11 @@ describe('proxy-request', function () {
       const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
-        modifyResponse(body) {
-          assert.equal(body, ctx.s.successText);
+        modifyResponse(response) {
+          assert.equal(response.body, ctx.s.successText);
           assert.equal(res.statusCode, 200);
-          this.response.statusCode = 206;
-          return MODIFIED;
+          response.statusCode = 206;
+          response.body = MODIFIED;
         }
       }, res)
         .then(request => {

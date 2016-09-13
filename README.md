@@ -64,11 +64,11 @@ const http = require('http');
 http.createServer((req, res) => {
   proxy(req, {
     url: `http://www.google.com${req.url}`,
-    modifyResponse(body) {
+    modifyResponse(response) {
       // change headers
-      this.reponse.headers['content-type'] = 'application/json; charset: utf8';
+      response.headers['content-type'] = 'application/json; charset: utf8';
       // use new content, must be string or buffer;
-      return JSON.stringify({content: body});
+      response.body = JSON.stringify({content: body});
     }
   }, res)
     .then(request => {
