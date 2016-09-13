@@ -1,8 +1,8 @@
 const http = require('http');
 const server = require('./server');
 
-exports.test = function test(testCase, trigger) {
-  const s = server.createMockServer();
+exports.test = function test(testCase, trigger, serverConfig) {
+  const s = server.createMockServer(serverConfig);
 
   http.createServer((req, res) => {
     s.listen(s.port, function() {
