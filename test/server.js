@@ -2,7 +2,7 @@ const http = require('http');
 
 exports.createMockServer = function createMockServer(config) {
   config = Object.assign({
-    contentType: 'application/json; charset=utf8',
+    contentType: 'application/json; charset=utf-8',
     successText: '{"success": true}',
     failText: '{"success": true}',
     port: 0
