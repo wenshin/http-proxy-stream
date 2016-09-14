@@ -2,7 +2,7 @@ const assert = require('assert');
 const utils = require('./utils');
 const proxy = require('../lib');
 
-describe('proxy-request', function () {
+describe('proxy-request-modify', function () {
   it('proxy(req, {url, modifyResponse}, res)', function (done) {
     const MODIFIED = 'modified';
     utils.test(function(req, res) {
@@ -78,11 +78,11 @@ describe('proxy-request', function () {
     });
   });
 
-  it('response content type is text/html', function (done) {
+  it('response content type is text/html and long content', function (done) {
     const MODIFIED = 'modified';
     const serverConfig = {
       contentType: 'text/html; charset=utf8',
-      successText: '<!DOCTYPE html> success',
+      successText: '<!DOCTYPE html> success' + (new Array(10000)).fill('a').join(''),
       failText: '<!DOCTYPE html> fail'
     };
     utils.test(function(req, res) {
