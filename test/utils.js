@@ -1,17 +1,26 @@
 const http = require('http');
 const server = require('./server');
 
-exports.test = function test(testCase, trigger, serverConfig) {
-  const s = server.createMockServer(serverConfig);
+exports.test = function test(testCase, request, serverName, serverConfig) {
+  if (typeof serverName !== 'string') {
+    serverConfig = serverName;
+    serverName = 'createMockServer';
+  }
+  const s = server[serverName](serverConfig);
 
-  http.createServer((req, res) => {
+  s.server = http.createServer((req, res) => {
     s.listen(s.port, function() {
       this.s = s;
-      testCase.call(this, req, res)
-    })
-  }).listen(0, function() {
+      try {
+        testCase.call(this, req, res)
+      } catch (e) {
+        res.writeHead(500);
+        res.end('');
+      }
+    });
+  }).listen(s.port - 1, function() {
     this.s = s;
-    trigger.call(this);
+    request.call(this);
   });
 };
 
@@ -27,10 +36,16 @@ exports.get = function(options, handleEnd) {
     res.setEncoding('utf8')
     res.on('data', (chunk) => data += chunk);
     res.on('end', () => {
+      ctx.s.server.close();
       ctx.s.close();
       handleEnd(res, data);
     });
   });
-  get.on('error', (e) => {throw e;});
+  get.on('error', (e) => {
+    ctx.s.server.close();
+    ctx.s.close();
+    console.log('get error')
+    throw e;
+  });
   get.end();
 }

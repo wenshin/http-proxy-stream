@@ -14,6 +14,7 @@
     "test": "test"
   },
   "dependencies": {
+    "mime-types": "~2.1.7",
     "request": "^2.74.0"
   },
   "devDependencies": {

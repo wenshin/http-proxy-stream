@@ -81,7 +81,7 @@ describe('proxy-request-modify', function () {
   it('response content type is text/html and long content', function (done) {
     const MODIFIED = 'modified';
     const serverConfig = {
-      contentType: 'text/html; charset=utf8',
+      contentType: 'text/html',
       successText: '<!DOCTYPE html> success' + (new Array(10000)).fill('a').join(''),
       failText: '<!DOCTYPE html> fail'
     };
@@ -90,6 +90,7 @@ describe('proxy-request-modify', function () {
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
         modifyResponse(response) {
+          assert.equal(typeof response.body, 'string');
           assert.equal(response.body, ctx.s.successText);
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
@@ -104,5 +105,51 @@ describe('proxy-request-modify', function () {
         done()
       });
     }, serverConfig);
+  });
+
+  it('response content type is image/png', function (done) {
+    const MODIFIED = 'modified';
+    const serverConfig = {
+      contentType: 'image/png',
+      successText: new Buffer('123')
+    };
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(response) {
+          assert.ok(response.body.equals(ctx.s.successText), 'instanceof Buffer and equal');
+          assert.equal(res.statusCode, 200);
+          response.statusCode = 206;
+          response.body = MODIFIED;
+        }
+      }, res)
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.statusCode, 206);
+        assert.equal(body, MODIFIED);
+        done()
+      });
+    }, serverConfig);
+  });
+
+  it('response content type is excel will not stringify buffer', function (done) {
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(response) {
+          assert.ok(response.body instanceof Buffer);
+        }
+      }, res)
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.statusCode, 200);
+        assert.equal(body, ctx.s.successText);
+        done()
+      });
+    }, 'createMockFileServer');
   });
 });
