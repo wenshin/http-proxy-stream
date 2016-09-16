@@ -44,10 +44,14 @@ http.createServer((req, res) => {
 // koa middleware
 function* koaProxy(next) {
   const req = yield proxy(this.req, {url: `http://www.google.com${this.req.url}`});
-  req.on('response', function(response) {
-    // A chance to change response headers before pipe
-    this.headers = response.headers;
-  });
+  // run koa middlewares after response event executed
+  yield function(done) {
+    req.on('response', function(response) {
+      // A chance to change response headers before pipe
+      this.headers = response.headers;
+      done();
+    });
+  }
   this.body = req;
 }
 ```

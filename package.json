@@ -1,6 +1,6 @@
 {
   "name": "proxy-request",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "node": ">=6.1.0"
   },
@@ -42,7 +42,7 @@
     "node request",
     "node stream pipe",
     "pipe",
-    "stream",
+    "stream"
   ],
   "author": "Yuanwen",
   "license": "MIT",
