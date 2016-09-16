@@ -71,7 +71,7 @@ http.createServer((req, res) => {
     modifyResponse(response) {
       // change headers
       response.headers['content-type'] = 'application/json; charset: utf8';
-      // use new content, must be string or buffer;
+      // use new content, can be string, buffer, null, undefined or object;
       response.body = JSON.stringify({content: body});
     }
   }, res)
@@ -91,6 +91,14 @@ http.createServer((req, res) => {
     $> npm publish
 
 # Release Note
+
+v0.1.2 2016-09-17
+
+    * modifyResponse can set response.body to object, null and undefined.
+
+v0.1.1 2016-09-17
+
+    * fix some bugs in koa flow.
 
 v0.1.0 2016-09-12
 

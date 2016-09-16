@@ -27,7 +27,7 @@ describe('proxy-request-modify', function () {
   });
 
   it('proxy(req, {url, modifyResponse}).then(request => request.pipe(res))', function (done) {
-    const MODIFIED = 'modified';
+    const modified = {a: 1};
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
@@ -36,13 +36,13 @@ describe('proxy-request-modify', function () {
           assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
           response.statusCode = 206;
           response.headers.test = 'test';
-          response.body = MODIFIED;
+          response.body = modified;
         }
       }).then(request => request.pipe(res));
     }, function() {
       utils.get.call(this, null, function(res, body) {
         assert.equal(res.statusCode, 206);
-        assert.equal(body, MODIFIED);
+        assert.equal(body, JSON.stringify(modified));
         assert.equal(res.headers.test, 'test');
         done()
       });
@@ -159,6 +159,32 @@ describe('proxy-request-modify', function () {
       utils.get.call(ctx, null, function(res, body) {
         assert.equal(res.statusCode, 206);
         assert.equal(body, MODIFIED);
+        done()
+      });
+    }, serverConfig);
+  });
+
+  it('modify response body to null, undefined', function (done) {
+    const serverConfig = {
+      contentType: 'image/png',
+      successText: new Buffer('123')
+    };
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(response) {
+          assert.ok(response.body.equals(ctx.s.successText), 'instanceof Buffer and equal');
+          assert.equal(res.statusCode, 200);
+          response.statusCode = 206;
+          response.body = null;
+        }
+      }, res)
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.statusCode, 206);
+        assert.equal(body, '');
         done()
       });
     }, serverConfig);
