@@ -36,8 +36,13 @@
     "url": "git+https://github.com/wenshin/proxy-request.git"
   },
   "keywords": [
-    "promise",
-    "all"
+    "proxy",
+    "request",
+    "node proxy",
+    "node request",
+    "node stream pipe",
+    "pipe",
+    "stream",
   ],
   "author": "Yuanwen",
   "license": "MIT",
