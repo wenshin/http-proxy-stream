@@ -1,8 +1,8 @@
 # proxy-request
 
-a proxy tool by request which damn convenient with stream pipe. inspired by [request](https://github.com/request/request)
+a proxy tool which damn convenient with stream pipe. also with 96% test coverage. inspired by [request](https://github.com/request/request)
 
-## feature
+## features
 
 * pipe http proxy
 * modify response before pipe to destination stream
