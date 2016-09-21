@@ -192,7 +192,6 @@ describe('proxy-request-modify', function () {
 
   it('response content type is excel will not stringify buffer', function (done) {
     utils.test(function(req, res) {
-      const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
         modifyResponse(response) {
@@ -207,5 +206,24 @@ describe('proxy-request-modify', function () {
         done()
       });
     }, 'createMockFileServer');
+  });
+
+  it('promise reject when modifyResponse throw error', function (done) {
+    utils.test(function(req, res) {
+      try {
+        proxy(req, {
+          url: `http://localhost:${this.address().port}`,
+          modifyResponse() {
+            throw new Error('test');
+          }
+        }, res).catch(err => console.log(err))
+      } catch (err) {
+        console.log('111111111111');
+        done();
+      }
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx);
+    });
   });
 });
