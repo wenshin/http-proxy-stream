@@ -92,6 +92,10 @@ http.createServer((req, res) => {
 
 # Release Note
 
+v0.1.3 2016-09-22
+
+    * catch some errors and reject them
+
 v0.1.2 2016-09-17
 
     * modifyResponse can set response.body to object, null and undefined.
