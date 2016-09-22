@@ -29,7 +29,7 @@ exports.get = function(options, handleEnd) {
   options = options || {
     path: '/',
     host: 'localhost',
-    port: ctx.address().port
+    port: ctx.s.port - 1
   };
   const get = http.get(options, function(res) {
     let data = '';

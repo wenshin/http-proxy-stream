@@ -210,20 +210,22 @@ describe('proxy-request-modify', function () {
 
   it('promise reject when modifyResponse throw error', function (done) {
     utils.test(function(req, res) {
-      try {
-        proxy(req, {
-          url: `http://localhost:${this.address().port}`,
-          modifyResponse() {
-            throw new Error('test');
-          }
-        }, res).catch(err => console.log(err))
-      } catch (err) {
-        console.log('111111111111');
-        done();
-      }
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse() {
+          throw new Error('test');
+        }
+      }, res).catch(err => {
+        assert.equal(err.name, 'ProxyRequestError');
+        assert.ok(err instanceof Error);
+        assert.equal(err.message, 'complete event exception');
+        res.end('handle error');
+      });
     }, function() {
       const ctx = this;
-      utils.get.call(ctx);
+      utils.get.call(ctx, null, function() {
+        done();
+      });
     });
   });
 });
