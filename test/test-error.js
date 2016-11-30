@@ -1,5 +1,5 @@
 const assert = require('assert');
-const proxy = require('../lib');
+const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
 
 describe('proxy-request error', function () {
   it('modifyResponse is not function throw error', function (done) {

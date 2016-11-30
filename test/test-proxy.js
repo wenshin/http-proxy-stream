@@ -1,6 +1,7 @@
 const assert = require('assert');
 const utils = require('./utils');
-const proxy = require('../lib');
+const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
+console.log(`test in ../${process.env.TEST_DIR || 'lib'}`)
 
 describe('proxy-request', function () {
   it('proxy(req, {url}, res)', function (done) {

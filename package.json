@@ -29,7 +29,7 @@
   "scripts": {
     "prepublish": "npm run mocha",
     "test": "node_modules/.bin/nodemon --exec npm run mocha",
-    "mocha": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha",
+    "mocha": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha --use_strict",
     "debug-test": "npm run mocha -- debug"
   },
   "repository": {
