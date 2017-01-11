@@ -18,8 +18,16 @@ http.createServer((req, res) => {
   // });
   proxy(req, {
     url: 'http://localhost:8000',
-    modifyResponse(response) {
-      console.log('isEqual', file.toString() == response.body.toString());
+    onResponse(resp) {
+      throw new Error('test')
     }
-  }, res);
-}).listen(8002);
+  })
+    .then(request => {
+      request.on('error', err => {
+        res.end(err.stack);
+      });
+      request.pipe(res)
+    })
+    .catch(err => console.log('catch error'))
+})
+  .listen(8002);
