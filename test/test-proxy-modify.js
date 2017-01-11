@@ -49,12 +49,15 @@ describe('proxy-request-modify', function () {
     });
   });
 
-  it('proxy(req, {url, modifyResponse}, res).then(request => request.on("response", fn))', function (done) {
+  it('proxy(req, {url, modifyResponse, onResponse}, res)', function (done) {
     const MODIFIED = 'modified';
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
+        onResponse(response) {
+          response.headers.test = 'test';
+        },
         modifyResponse(response) {
           assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
           assert.equal(res.statusCode, 200);
@@ -62,11 +65,6 @@ describe('proxy-request-modify', function () {
           response.body = MODIFIED;
         }
       }, res)
-        .then(request => {
-          request.on('response', (response) => {
-            response.headers.test = 'test';
-          });
-        });
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
@@ -78,12 +76,15 @@ describe('proxy-request-modify', function () {
     });
   });
 
-  it('proxy(req, {url, modifyResponse}).then(request => request.on("response", () => request.pipe(res)))', function (done) {
+  it('proxy(req, {url, onResponse, modifyResponse}).then(request => request.pipe(res))', function (done) {
     const MODIFIED = 'modified';
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
+        onResponse(response) {
+          response.headers.test = 'test';
+        },
         modifyResponse(response) {
           assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
           assert.equal(res.statusCode, 200);
@@ -91,12 +92,7 @@ describe('proxy-request-modify', function () {
           response.body = MODIFIED;
         }
       })
-        .then(request => {
-          request.on('response', (response) => {
-            response.headers.test = 'test';
-            request.pipe(res);
-          });
-        });
+        .then(request => request.pipe(res));
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
@@ -206,26 +202,5 @@ describe('proxy-request-modify', function () {
         done()
       });
     }, 'createMockFileServer');
-  });
-
-  it('promise reject when modifyResponse throw error', function (done) {
-    utils.test(function(req, res) {
-      proxy(req, {
-        url: `http://localhost:${this.address().port}`,
-        modifyResponse() {
-          throw new Error('test');
-        }
-      }, res).catch(err => {
-        assert.equal(err.name, 'ProxyRequestError');
-        assert.ok(err instanceof Error);
-        assert.equal(err.message, 'complete event exception');
-        res.end('handle error');
-      });
-    }, function() {
-      const ctx = this;
-      utils.get.call(ctx, null, function() {
-        done();
-      });
-    });
   });
 });

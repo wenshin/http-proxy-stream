@@ -4,7 +4,7 @@ const fs = require('fs');
 const assert = require('assert');
 const request = require('request');
 
-const fileBuffer = fs.readFileSync('./test.xlsx');
+const file = fs.readFileSync('./test.xlsx');
 
 http.createServer((req, res) => {
   // request.get('http://localhost:8000', {encoding: null}, function(err, response, body) {
@@ -19,8 +19,7 @@ http.createServer((req, res) => {
   proxy(req, {
     url: 'http://localhost:8000',
     modifyResponse(response) {
-      const file = fs.readFileSync('./test.xlsx');
-      console.log('isEqual', file == response.body);
+      console.log('isEqual', file.toString() == response.body.toString());
     }
   }, res);
-}).listen(8001);
+}).listen(8002);
