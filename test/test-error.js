@@ -3,20 +3,12 @@ const utils = require('./utils');
 const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
 
 describe('proxy-request error', function () {
-  it('modifyResponse is not function throw error', function (done) {
-    proxy({readable: true}, {modifyResponse: 1})
-      .catch(err => {
-        assert.ok(err instanceof Error);
-        done();
-      })
-  });
-
-  it('request.readable is false throw error', function (done) {
-    proxy({readable: false})
-      .catch(err => {
-        assert.ok(err instanceof Error);
-        done();
-      })
+  it('modifyResponse is not function throw error', function () {
+    try {
+      proxy({headers: {}, connection: {}}, {modifyResponse: 1})
+    } catch (err) {
+      assert.ok(err instanceof proxy.ProxyRequestError);
+    }
   });
 
   it('promise reject when modifyResponse throw error', function (done) {
