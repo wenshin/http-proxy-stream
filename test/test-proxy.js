@@ -1,4 +1,5 @@
 const assert = require('assert');
+const stream = require('stream');
 const utils = require('./utils');
 const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
 console.log(`test in ../${process.env.TEST_DIR || 'lib'}`)
@@ -25,9 +26,10 @@ describe('proxy-request default', function () {
           assert.equal(request.response.constructor.name, 'IncomingMessage');
           assert.equal(request.options.hostname, 'localhost');
           assert.equal(request.options.port, port);
+          assert.ok(request instanceof stream.Stream);
           assert.ok(request instanceof proxy.CacheStream);
           assert.ok(request.reqCacheStream instanceof proxy.CacheStream);
-          request.pipe(res);
+          assert.equal(request.pipe(res), res);
         })
         .catch(err => console.log(err));
     }, function() {
