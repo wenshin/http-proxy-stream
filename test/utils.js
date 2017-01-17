@@ -41,11 +41,10 @@ exports.get = function(options, handleEnd) {
       handleEnd(res, data);
     });
   });
-  get.on('error', (e) => {
+  get.on('error', (err) => {
     ctx.s.server.close();
     ctx.s.close();
-    console.log('get error')
-    throw e;
+    console.log('get error', err)
   });
   get.end();
 }
