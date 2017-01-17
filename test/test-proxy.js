@@ -22,7 +22,7 @@ describe('proxy-request default', function () {
       const port = this.address().port;
       proxy(req, {url: `http://localhost:${port}`})
         .then(request => {
-          assert.equal(request.res.constructor.name, 'IncomingMessage');
+          assert.equal(request.response.constructor.name, 'IncomingMessage');
           assert.equal(request.options.hostname, 'localhost');
           assert.equal(request.options.port, port);
           assert.ok(request instanceof proxy.CacheStream);

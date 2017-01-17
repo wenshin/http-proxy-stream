@@ -31,15 +31,23 @@ describe('proxy-request-modify', function () {
     const modified = {a: 1};
     utils.test(function(req, res) {
       const ctx = this;
+      const port = this.address().port;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${port}`,
         modifyResponse(response) {
           assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
           response.statusCode = 206;
           response.headers.test = 'test';
           response.body = modified;
         }
-      }).then(request => request.pipe(res));
+      }).then(request => {
+        assert.equal(request.response.constructor.name, 'IncomingMessage');
+        assert.equal(request.options.hostname, 'localhost');
+        assert.equal(request.options.port, port);
+        assert.ok(request instanceof proxy.CacheStream);
+        assert.ok(request.reqCacheStream instanceof proxy.CacheStream);
+        request.pipe(res);
+      }).catch(err => console.log(err));
     }, function() {
       utils.get.call(this, null, function(res, body) {
         assert.equal(res.statusCode, 206);
