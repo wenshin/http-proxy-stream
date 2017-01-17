@@ -1,6 +1,6 @@
 {
   "name": "proxy-request",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "engines": {
     "node": ">=6.1.0"
   },
@@ -27,7 +27,7 @@
     "nodemon": "^1.9.2"
   },
   "scripts": {
-    "prepublish": "npm run mocha",
+    "prepublish": "babel lib -d dist && TEST_DIR=dist npm run mocha",
     "test": "node_modules/.bin/nodemon --exec npm run mocha",
     "mocha": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha --use_strict",
     "debug-test": "npm run mocha -- debug"
