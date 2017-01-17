@@ -41,14 +41,14 @@ describe('proxy-request-modify', function () {
           response.headers.test = 'test';
           response.body = modified;
         }
-      }).then(request => {
-        assert.equal(request.response.constructor.name, 'IncomingMessage');
-        assert.equal(request.options.hostname, 'localhost');
-        assert.equal(request.options.port, port);
-        assert.ok(request instanceof stream.Stream);
-        assert.ok(request instanceof proxy.CacheStream);
-        assert.ok(request.reqCacheStream instanceof proxy.CacheStream);
-        assert.equal(request.pipe(res), res);
+      }).then(response => {
+        assert.equal(response.response.constructor.name, 'IncomingMessage');
+        assert.equal(response.options.hostname, 'localhost');
+        assert.equal(response.options.port, port);
+        assert.ok(response instanceof stream.Stream);
+        assert.ok(response instanceof proxy.CacheStream);
+        assert.ok(response.reqCacheStream instanceof proxy.CacheStream);
+        assert.equal(response.pipe(res), res);
       }).catch(err => console.log(err));
     }, function() {
       utils.get.call(this, null, function(res, body) {
@@ -103,7 +103,7 @@ describe('proxy-request-modify', function () {
           response.body = MODIFIED;
         }
       })
-        .then(request => request.pipe(res));
+        .then(response => response.pipe(res));
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {

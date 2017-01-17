@@ -18,23 +18,25 @@ describe('proxy-request default', function () {
     });
   });
 
-  it('proxy(req, {url}).then(request => request.pipe(res))', function (done) {
+  it('proxy(req, {url}).then(response => response.pipe(res))', function (done) {
     utils.test(function(req, res) {
       const port = this.address().port;
       proxy(req, {url: `http://localhost:${port}`})
-        .then(request => {
-          assert.equal(request.response.constructor.name, 'IncomingMessage');
-          assert.equal(request.options.hostname, 'localhost');
-          assert.equal(request.options.port, port);
-          assert.ok(request instanceof stream.Stream);
-          assert.ok(request instanceof proxy.CacheStream);
-          assert.ok(request.reqCacheStream instanceof proxy.CacheStream);
-          assert.equal(request.pipe(res), res);
+        .then(response => {
+          assert.equal(response.response.constructor.name, 'IncomingMessage');
+          assert.equal(response.options.hostname, 'localhost');
+          assert.equal(response.options.port, port);
+          assert.ok(response instanceof stream.Stream);
+          assert.ok(response instanceof proxy.CacheStream);
+          assert.equal(response.srcHeaders['transfer-encoding'], 'chunked');
+          assert.ok(response.reqCacheStream instanceof proxy.CacheStream);
+          assert.equal(response.pipe(res), res);
         })
         .catch(err => console.log(err));
     }, function() {
       const ctx = this;
       utils.get.call(this, null, function(res, body) {
+        assert.ok(!res.headers['content-length']);
         assert.equal(res.statusCode, 200);
         assert.equal(body, ctx.s.successText);
         done()
@@ -42,25 +44,30 @@ describe('proxy-request default', function () {
     });
   });
 
-  it('proxy(req, {url, onResponse}).then(request => request.pipe(res))', function (done) {
+  it('proxy(req, {url, onResponse}).then(response => response.pipe(res))', function (done) {
     utils.test(function(req, res) {
+      const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
         onResponse(response) {
+          assert.equal(response.headers['content-length'], ctx.s.successText.length);
           response.headers.test = 'test';
         }
       })
-        .then(request => {
-          request.pipe(res);
-        });
+        .then(response => {
+          response.pipe(res);
+        })
+        .catch(err => console.log(err));
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.headers['transfer-encoding'], 'chunked');
+        assert.ok(!res.headers['content-length']);
         assert.equal(res.statusCode, 200);
         assert.equal(body, ctx.s.successText);
         assert.equal(res.headers.test, 'test');
         done()
       });
-    });
+    }, {isChunked: false});
   });
 });

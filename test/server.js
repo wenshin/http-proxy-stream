@@ -4,21 +4,30 @@ const zlib = require('zlib');
 const fs = require('fs');
 
 const PORT = 8777;
+const SUCC_TEXT = '{"success": true}';
+const FAIL_TEXT = '{"success": false}';
 
 exports.createMockServer = function createMockServer(config) {
   config = Object.assign({
+    isChunked: true,
     contentType: 'application/json; charset=utf-8',
-    successText: '{"success": true}',
-    failText: '{"success": true}',
+    successText: SUCC_TEXT,
+    failText: FAIL_TEXT,
     port: PORT
   }, config || {});
 
   const s = http.createServer((req, res) => {
     const matched = req.url.match(/status=(\d+)/i) || [];
     const status = matched[1] || 200;
-    res.writeHead(status, s.headers);
     let content = config.successText;
     if (status >= 400) content = config.failText;
+
+    if (config.isChunked) {
+      s.headers['transfer-encoding'] = 'chunked';
+    } else {
+      s.headers['content-length'] = content.length;
+    }
+    res.writeHead(status, s.headers);
     res.end(content)
   });
   s.headers = {'content-type': config.contentType, test: 'test header'};
