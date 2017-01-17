@@ -15,7 +15,7 @@ exports.test = function test(testCase, request, serverName, serverConfig) {
         testCase.call(this, req, res)
       } catch (e) {
         res.writeHead(500);
-        res.end('');
+        res.end('Test Case Fail');
       }
     });
   }).listen(s.port - 1, function() {

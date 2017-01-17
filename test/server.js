@@ -55,3 +55,29 @@ exports.createMockFileServer = function createMockFileServer(config) {
   s.port = config.port;
   return s;
 }
+
+
+exports.createRedirectServer = function createRedirectServer(config) {
+  config = Object.assign({
+    code: 301,
+    port: PORT
+  }, config || {});
+
+  const s = http.createServer((req, res) => {
+    if (req.url.indexOf('/redirected')) {
+      res.writeHead(200, {
+        'content-type': 'text/plain'
+      });
+      res.end('redirected');
+    } else {
+      res.writeHead(config.code, {
+        location: `http://${req.headers.host}/redirected`
+      });
+      res.end(null);
+    }
+  });
+
+  s.successText = 'redirected';
+  s.port = config.port;
+  return s;
+}
