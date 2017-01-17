@@ -52,23 +52,4 @@ describe('proxy-request', function () {
       });
     });
   });
-
-  it('proxy(req, {url}, res).then(request => request.on("response", fn))', function (done) {
-    utils.test(function(req, res) {
-      proxy(req, {url: `http://localhost:${this.address().port}`}, res)
-        .then(request => {
-          request.on('response', (response) => {
-            response.headers.test = 'test';
-          });
-        });
-    }, function() {
-      const ctx = this;
-      utils.get.call(ctx, null, function(res, body) {
-        assert.equal(res.statusCode, 200);
-        assert.equal(body, ctx.s.successText);
-        assert.equal(res.headers.test, 'test');
-        done()
-      });
-    });
-  });
 });

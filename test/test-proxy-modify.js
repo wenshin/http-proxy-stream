@@ -1,7 +1,6 @@
 const assert = require('assert');
 const utils = require('./utils');
 const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
-const http = require('http');
 
 describe('proxy-request-modify', function () {
   it('proxy(req, {url, modifyResponse}, res)', function (done) {
@@ -148,13 +147,16 @@ describe('proxy-request-modify', function () {
           assert.ok(response.body.equals(ctx.s.successText), 'instanceof Buffer and equal');
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
+          response.statusMessage = 'TEST';
           response.body = MODIFIED;
         }
       }, res)
+        .catch(err => console.log(err))
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
         assert.equal(res.statusCode, 206);
+        assert.equal(res.statusMessage, 'TEST');
         assert.equal(body, MODIFIED);
         done()
       });

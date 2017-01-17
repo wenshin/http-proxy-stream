@@ -20,6 +20,10 @@ describe('proxy-request error', function () {
         }
       }, res)
         .catch(err => {
+          assert.ok(!!err.proxyInfo.headers);
+          assert.ok(!!err.proxyInfo.resHeaders);
+          assert.equal(err.proxyInfo.resStatus, 200);
+          assert.equal(err.proxyInfo.resRawBody, '{"success": true}');
           assert.ok(err instanceof proxy.ProxyRequestError);
           assert.equal(err.message, 'create new stream error');
           res.end('handle error');
@@ -32,29 +36,23 @@ describe('proxy-request error', function () {
     });
   });
 
-  // it('promise reject when options.onResponse error', function (done) {
-  //   utils.test(function(req, res) {
-  //     proxy(req, {
-  //       url: `http://localhost:${this.address().port}`,
-  //       onResponse(resp) {
-  //         throw new Error('test response');
-  //       },
-  //       modifyResponse(res) {
-  //         return res;
-  //       }
-  //     })
-  //       .then(request => {
-  //         request.on('error', err => {
-  //           assert.ok(err instanceof proxy.ProxyRequestError);
-  //           assert.equal(err.message, 'options.onResponse throw error');
-  //           res.end('handle error');
-  //         });
-  //       })
-  //   }, function() {
-  //     const ctx = this;
-  //     utils.get.call(ctx, null, function() {
-  //       done();
-  //     });
-  //   });
-  // });
+  it('promise reject when options.onResponse error', function (done) {
+    utils.test(function(req, res) {
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        onResponse(resp) {
+          throw new Error('test response');
+        }
+      })
+        .catch(err => {
+          assert.ok(err instanceof proxy.ProxyRequestError);
+          res.end('handle error');
+        })
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function() {
+        done();
+      });
+    });
+  });
 });
