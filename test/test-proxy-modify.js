@@ -15,7 +15,8 @@ describe('proxy-request-modify', function () {
           response.headers.test = 'test';
           response.body = MODIFIED;
         }
-      }, res);
+      }, res)
+        .catch(err => console.log(err));
     }, function() {
       utils.get.call(this, null, function(res, body) {
         assert.equal(res.statusCode, 206);
