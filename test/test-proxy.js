@@ -19,8 +19,17 @@ describe('proxy-request default', function () {
 
   it('proxy(req, {url}).then(request => request.pipe(res))', function (done) {
     utils.test(function(req, res) {
-      proxy(req, {url: `http://localhost:${this.address().port}`})
-        .then(request => request.pipe(res));
+      const port = this.address().port;
+      proxy(req, {url: `http://localhost:${port}`})
+        .then(request => {
+          assert.equal(request.res.constructor.name, 'IncomingMessage');
+          assert.equal(request.options.hostname, 'localhost');
+          assert.equal(request.options.port, port);
+          assert.ok(request instanceof proxy.CacheStream);
+          assert.ok(request.reqCacheStream instanceof proxy.CacheStream);
+          request.pipe(res);
+        })
+        .catch(err => console.log(err));
     }, function() {
       const ctx = this;
       utils.get.call(this, null, function(res, body) {
