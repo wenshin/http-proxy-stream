@@ -48,6 +48,7 @@ describe('proxy-request-modify', function () {
         assert.ok(response instanceof stream.Stream);
         assert.ok(response instanceof proxy.CacheStream);
         assert.ok(response.reqCacheStream instanceof proxy.CacheStream);
+        assert.deepEqual(response.body, modified);
         assert.equal(response.pipe(res), res);
       }).catch(err => console.log(err));
     }, function() {

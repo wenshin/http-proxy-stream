@@ -73,7 +73,7 @@ exports.createRedirectServer = function createRedirectServer(config) {
   }, config || {});
 
   const s = http.createServer((req, res) => {
-    if (req.url.indexOf('/redirected')) {
+    if (req.url.indexOf('/redirected') > -1) {
       res.writeHead(200, {
         'content-type': 'text/plain'
       });

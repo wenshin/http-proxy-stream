@@ -36,6 +36,7 @@ describe('proxy-request default', function () {
     }, function() {
       const ctx = this;
       utils.get.call(this, null, function(res, body) {
+        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
         assert.ok(!res.headers['content-length']);
         assert.equal(res.statusCode, 200);
         assert.equal(body, ctx.s.successText);
