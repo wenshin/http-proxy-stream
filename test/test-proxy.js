@@ -71,4 +71,70 @@ describe('proxy-request default', function () {
       });
     }, {isChunked: false});
   });
+
+  it('proxy(req, {url, modifyResponse}, res)', function (done) {
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(response) {
+          return;
+        }
+      }, res).catch(err => console.log(err));
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.headers['transfer-encoding'], 'chunked');
+        assert.ok(!res.headers['content-encoding']);
+        assert.ok(!res.headers['content-length']);
+        assert.deepEqual(JSON.parse(body), JSON.parse(ctx.s.successText));
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
+        done()
+      });
+    }, {isChunked: false});
+  });
+
+  it('proxy(req, {url, modifyResponse}, res) unziped stream will not have content-encoding gzip', function (done) {
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}/json`,
+        modifyResponse(response) {
+          response.headers.test = 'test';
+        }
+      }, res).catch(err => console.log(err));
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.headers['transfer-encoding'], 'chunked');
+        assert.ok(!res.headers['content-encoding']);
+        assert.ok(!res.headers['content-length']);
+        assert.deepEqual(JSON.parse(body), JSON.parse(ctx.s.successText));
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
+        assert.equal(res.headers.test, 'test');
+        done()
+      });
+    }, 'createMockFileServer', {isChunked: false});
+  });
+
+  it('proxy(req, {url}, res) will keep content-encoding gzip', function (done) {
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {url: `http://localhost:${this.address().port}`}, res)
+        .catch(err => console.log(err));
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        assert.ok(!res.headers['content-length']);
+        assert.equal(res.headers['transfer-encoding'], 'chunked');
+        assert.equal(res.headers['content-encoding'], 'gzip');
+        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
+        assert.equal(body, ctx.s.successTextGziped);
+        assert.equal(res.statusCode, 200);
+        done()
+      });
+    }, 'createMockFileServer', {isChunked: false});
+  });
 });

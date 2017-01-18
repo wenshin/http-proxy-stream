@@ -40,26 +40,41 @@ exports.createMockServer = function createMockServer(config) {
 exports.createMockFileServer = function createMockFileServer(config) {
   config = Object.assign({
     filePath: path.join(__dirname, '/assets/test.xlsx'),
-    contentType: 'application/vnd.ms-excel',
     port: PORT
   }, config || {});
 
   const filename = path.basename(config.filePath);
 
   const s = http.createServer((req, res) => {
-    fs.readFile(config.filePath, function(err, data) {
-      s.successText = data;
-      zlib.gzip(data, function(err, gzip) {
-        res.writeHead(200, {
-          'Content-Type': config.contentType,
-          'Content-Disposition': `attachment; filename="${filename}"`,
-          'Content-Encoding': 'gzip'
+    if (req.url.indexOf('/json') > -1) {
+      config.contentType = 'application/json';
+      zlib.gzip(SUCC_TEXT, function(err, gzip) {
+          res.writeHead(200, {
+            'Content-Type': config.contentType,
+            'Content-Disposition': `attachment; filename="${filename}"`,
+            'Content-Encoding': 'gzip'
+          });
+          s.successText = SUCC_TEXT;
+          s.successTextGziped = gzip.toString();
+          res.end(gzip);
         });
-        res.end(gzip);
+    } else {
+      config.contentType = 'application/vnd.ms-excel';
+      fs.readFile(config.filePath, function(err, data) {
+        zlib.gzip(data, function(err, gzip) {
+          res.writeHead(200, {
+            'Content-Type': config.contentType,
+            'Content-Disposition': `attachment; filename="${filename}"`,
+            'Content-Encoding': 'gzip'
+          });
+          s.successText = data;
+          s.successTextGziped = gzip.toString();
+          res.end(gzip);
+        });
       });
-    });
+    }
+    s.headers = {'content-type': config.contentType};
   });
-  s.headers = {'content-type': config.contentType};
   s.filename = filename;
   s.port = config.port;
   return s;
