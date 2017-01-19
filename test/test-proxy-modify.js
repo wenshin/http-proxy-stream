@@ -28,6 +28,33 @@ describe('proxy-request-modify', function () {
     });
   });
 
+  it('proxy(req, {url, bypassModifyResponse, modifyResponse}, res)', function (done) {
+    const MODIFIED = 'modified';
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        bypassModifyResponse(response) {
+          return !proxy.mime.isText(response.contentType.type);
+        },
+        modifyResponse(response) {
+          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          response.statusCode = 206;
+          response.headers.test = 'test';
+          response.body = MODIFIED;
+        }
+      }, res)
+        .catch(err => console.log(err));
+    }, function() {
+      utils.get.call(this, null, function(res, body) {
+        assert.equal(res.statusCode, 200);
+        assert.ok(!res.headers.test);
+        done()
+      });
+    }, 'createMockFileServer');
+  });
+
+
   it('proxy(req, {url, modifyResponse}).then(request => request.pipe(res))', function (done) {
     const modified = {a: 1};
     utils.test(function(req, res) {
