@@ -137,4 +137,24 @@ describe('proxy-request default', function () {
       });
     }, 'createMockFileServer', {isChunked: false});
   });
+   it('proxy(req, {url}, res) timeout', function (done) {
+    utils.test(function(req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        timeout: 10
+      }, res)
+        .catch(err => {
+          console.log(err);
+          assert.ok(err instanceof Error);
+          res.end();
+        });
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res, body) {
+        // TODO timeout case
+        done()
+      });
+    }, {delay: 50});
+  });
 });

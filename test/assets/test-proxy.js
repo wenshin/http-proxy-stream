@@ -16,18 +16,33 @@ http.createServer((req, res) => {
   //   res.write(body);
   //   res.end('0\r\n\r\n')
   // });
-  proxy(req, {
-    url: 'http://localhost:8000',
-    onResponse(resp) {
-      throw new Error('test')
-    }
+  // proxy(req, {
+  //   url: 'http://localhost:8000',
+  //   onResponse(resp) {
+  //     throw new Error('test')
+  //   }
+  // })
+  //   .then(request => {
+  //     request.on('error', err => {
+  //       res.end(err.stack);
+  //     });
+  //     request.pipe(res)
+  //   })
+  //   .catch(err => console.log('catch error'))
+  const areq = http.request({
+    hostname: 'www.baidu.com',
+    headers: Object.assign(req.headers, {host: null, connection: null})
+  });
+  areq.on('response', resp => {
+    res.statusCode = resp.statusCode;
+    res.statusMessage = resp.statusMessage;
+    res.headers = resp.headers;
+    resp.pipe(res);
   })
-    .then(request => {
-      request.on('error', err => {
-        res.end(err.stack);
-      });
-      request.pipe(res)
-    })
-    .catch(err => console.log('catch error'))
+  areq.setTimeout(100000, () => {
+    areq.abort();
+  })
+  areq.on('error', (err) => console.log(err))
+  req.pipe(areq);
 })
   .listen(8002);

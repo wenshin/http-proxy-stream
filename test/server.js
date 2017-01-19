@@ -27,8 +27,17 @@ exports.createMockServer = function createMockServer(config) {
     } else {
       s.headers['content-length'] = content.length;
     }
-    res.writeHead(status, s.headers);
-    res.end(content)
+
+    if (config.delay) {
+      setTimeout(() => {
+        console.log('timeout response', config.delay)
+        res.writeHead(status, s.headers);
+        res.end(content);
+      }, config.delay)
+    } else {
+      res.writeHead(status, s.headers);
+      res.end(content);
+    }
   });
   s.headers = {'content-type': config.contentType, test: 'test header'};
   s.successText = config.successText;
