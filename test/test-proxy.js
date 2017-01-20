@@ -81,10 +81,9 @@ describe('proxy-request default', function () {
 
   it('proxy(req, {url, modifyResponse}, res)', function (done) {
     utils.test(function(req, res) {
-      const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
-        modifyResponse(response) {
+        modifyResponse() {
           return;
         }
       }, res).catch(err => console.log(err));
@@ -104,7 +103,6 @@ describe('proxy-request default', function () {
 
   it('proxy(req, {url, modifyResponse}, res) unziped stream will not have content-encoding gzip', function (done) {
     utils.test(function(req, res) {
-      const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}/json`,
         modifyResponse(response) {
@@ -128,7 +126,6 @@ describe('proxy-request default', function () {
 
   it('proxy(req, {url}, res) will keep content-encoding gzip', function (done) {
     utils.test(function(req, res) {
-      const ctx = this;
       proxy(req, {url: `http://localhost:${this.address().port}`}, res)
         .catch(err => console.log(err));
     }, function() {
@@ -147,14 +144,13 @@ describe('proxy-request default', function () {
 
   it('proxy(req, {url}, res) timeout', function (done) {
     utils.test(function(req, res) {
-      const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
         timeout: 10
       }, res)
         .catch(err => {
-          console.log(err);
-          assert.ok(err instanceof Error);
+          assert.ok(err instanceof proxy.ProxyRequestError);
+          assert.equal(err.code, 'ESOCKETTIMEDOUT');
           res.end();
         });
     }, function() {
