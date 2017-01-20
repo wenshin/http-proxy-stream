@@ -21,16 +21,22 @@ describe('proxy-request default', function () {
   it('proxy(req, {url}).then(response => response.pipe(res))', function (done) {
     utils.test(function(req, res) {
       const port = this.address().port;
-      proxy(req, {url: `http://localhost:${port}`})
-        .then(response => {
-          assert.equal(response.response.constructor.name, 'IncomingMessage');
-          assert.equal(response.options.hostname, 'localhost');
-          assert.equal(response.options.port, port);
-          assert.ok(response instanceof stream.Stream);
-          assert.ok(response instanceof proxy.CacheStream);
-          assert.equal(response.srcHeaders['transfer-encoding'], 'chunked');
-          assert.ok(response.reqCacheStream instanceof proxy.CacheStream);
-          assert.equal(response.pipe(res), res);
+      proxy(req, {
+        url: `http://localhost:${port}`,
+        cache(resp) {
+          assert.equal(resp.constructor.name, 'IncomingMessage');
+          return true;
+        }
+      })
+        .then(resp => {
+          assert.equal(resp.response.constructor.name, 'IncomingMessage');
+          assert.equal(resp.options.hostname, 'localhost');
+          assert.equal(resp.options.port, port);
+          assert.ok(resp instanceof stream.Stream);
+          assert.ok(resp instanceof proxy.CacheStream);
+          assert.equal(resp.srcHeaders['transfer-encoding'], 'chunked');
+          assert.ok(resp.reqCacheStream instanceof proxy.CacheStream);
+          assert.equal(resp.pipe(res), res);
         })
         .catch(err => console.log(err));
     }, function() {
@@ -56,6 +62,7 @@ describe('proxy-request default', function () {
         }
       })
         .then(response => {
+          assert.equal(response.response.constructor.name, 'IncomingMessage');
           response.pipe(res);
         })
         .catch(err => console.log(err));
@@ -137,7 +144,8 @@ describe('proxy-request default', function () {
       });
     }, 'createMockFileServer', {isChunked: false});
   });
-   it('proxy(req, {url}, res) timeout', function (done) {
+
+  it('proxy(req, {url}, res) timeout', function (done) {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {

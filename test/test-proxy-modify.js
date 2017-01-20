@@ -62,6 +62,7 @@ describe('proxy-request-modify', function () {
       const port = this.address().port;
       proxy(req, {
         url: `http://localhost:${port}`,
+        cache: true,
         modifyResponse(response) {
           assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
           response.statusCode = 206;
