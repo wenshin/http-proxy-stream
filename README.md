@@ -10,7 +10,7 @@ a proxy tool which damn convenient with stream pipe. also with 90+% test coverag
 
 # Install
 
-    npm i --save proxy-request
+    npm i --save http-proxy-stream
 
 # API
 
