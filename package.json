@@ -1,5 +1,5 @@
 {
-  "name": "proxy-request",
+  "name": "http-proxy-stream",
   "version": "1.0.0",
   "engines": {
     "node": ">=6.1.0"
@@ -50,7 +50,7 @@
   "author": "Yuanwen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wenshin/proxy-request/issues"
+    "url": "https://github.com/wenshin/http-proxy-stream/issues"
   },
-  "homepage": "https://github.com/wenshin/proxy-request#readme"
+  "homepage": "https://github.com/wenshin/http-proxy-stream#readme"
 }

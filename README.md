@@ -24,7 +24,7 @@ a proxy tool which damn convenient with stream pipe. also with 90+% test coverag
 - **options.modifyResponse**: `Function(response)`, `Optional`, modify response before pipe to destination stream. accept one argument which is the body of response. the `this` keyword is reference of `request.Request` instance. the return value will be the new content of response.
 - **options.skipModifyResponse**: `Function(response)`, return true will skip modifyResponse.
 - **options.onResponse**: `Function(response)`, call once when http.ClientRequest emit 'response' event.
-- **options.cache**: `Boolean|Function(response)`, default false, if true will cache resopnse data for later usage. if function will call with response argument, return true will cache response.
+- **options.cache**: `Boolean|Function(response)`, default false, if true will cache resopnse data for later usage. if function will call with response as first argument, return true will cache response.
 - **response**: `Optional`, writable stream, like http.ServerResponse instance.
 
 ### proxy.mime
@@ -192,6 +192,10 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+
+v1.0.0 2017-02-06
+
+    * new api and new lib name
 
 v0.1.3 2016-09-22
 
