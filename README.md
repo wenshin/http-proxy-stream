@@ -14,8 +14,6 @@ a proxy tool which damn convenient with stream pipe. also with 90+% test coverag
 
 # API
 
-## Method
-
 ### proxy(request, [options, response])
 
 - **request**: `http.IncomingMessage` instance or other instance of request.
@@ -26,6 +24,7 @@ a proxy tool which damn convenient with stream pipe. also with 90+% test coverag
 - **options.onResponse**: `Function(response)`, call once when http.ClientRequest emit 'response' event.
 - **options.cache**: `Boolean|Function(response)`, default false, if true will cache resopnse data for later usage. if function will call with response as first argument, return true will cache response.
 - **response**: `Optional`, writable stream, like http.ServerResponse instance.
+- **Return**: `Promise`
 
 ### proxy.mime
 
@@ -33,14 +32,14 @@ a proxy tool which damn convenient with stream pipe. also with 90+% test coverag
 the miem type mean the http body is text which need deconding with charset
 
 #### proxy.mime.isJSON(mimeType)
+`true` the content can been json stringified, `false` otherwise.
 
-
-### proxyReturn
 
 #### proxyReturn.contentType
 a object parsed from http header 'content-type' field which like `{type: 'text/plain', charset: 'utf-8', parameters: {}}`
 
 #### proxyReturn.contentEncoding
+then value of 'Content-Encoding' header
 
 
 # Usage
@@ -192,6 +191,12 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+
+v1.0.1 2017-02-07
+
+    * CacheStream add clearCahce method
+    * tiny fix
+    * README update
 
 v1.0.0 2017-02-06
 
