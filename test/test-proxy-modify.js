@@ -28,13 +28,13 @@ describe('proxy-request-modify', function () {
     });
   });
 
-  it('proxy(req, {url, bypassModifyResponse, modifyResponse}, res)', function (done) {
+  it('proxy(req, {url, skipModifyResponse, modifyResponse}, res)', function (done) {
     const MODIFIED = 'modified';
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
-        bypassModifyResponse(response) {
+        skipModifyResponse(response) {
           return !proxy.mime.isText(response.contentType.type);
         },
         modifyResponse(response) {

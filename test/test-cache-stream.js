@@ -78,6 +78,20 @@ describe('CacheStream', function () {
     });
   });
 
+  it('CacheStream can not pipe again after call stream.clearCache()', function (done) {
+    const cStream = new proxy.CacheStream();
+    const ws = new TestWritableStream();
+    cStream.end('end');
+    cStream.pipe(ws);
+    ws.on('finish', () => {
+      assert.ok(!!cStream._cacheState.chunks.length);
+      cStream.clearCache();
+      assert.ok(!cStream._cacheState.chunks.length);
+      assert.throws(() => cStream.resetReadable(), Error);
+      done();
+    });
+  });
+
   it('CacheStream pipe from sync readable stream and sync pipe to writable stream', function (done) {
     const cStream = new proxy.CacheStream();
     const rs = new TestSyncReableStream();

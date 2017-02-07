@@ -23,9 +23,9 @@ describe('proxy-request error', function () {
           assert.ok(!!err.proxyInfo.headers);
           assert.ok(!!err.proxyInfo.resHeaders);
           assert.equal(err.proxyInfo.resStatus, 200);
-          assert.equal(err.proxyInfo.resRawBody, '{"success": true}');
+          assert.equal(err.proxyInfo.resBody, '{"success": true}');
           assert.ok(err instanceof proxy.ProxyRequestError);
-          assert.equal(err.message, 'create new stream error');
+          assert.equal(err.message, 'proxy options.modifyResponse error');
           res.end('handle error');
         });
     }, function() {
@@ -40,7 +40,7 @@ describe('proxy-request error', function () {
     utils.test(function(req, res) {
       proxy(req, {
         url: `http://localhost:${this.address().port}`,
-        onResponse(resp) {
+        onResponse() {
           throw new Error('test response');
         }
       })
