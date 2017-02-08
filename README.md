@@ -192,6 +192,9 @@ autoSameOriginRedirect
 
 # Release Note
 
+v1.0.2 2017-02-07
+    * refactor readBody method of read-content.js
+
 v1.0.1 2017-02-07
 
     * CacheStream add clearCahce method
