@@ -56,19 +56,20 @@ exports.createMockFileServer = function createMockFileServer(config) {
 
   const s = http.createServer((req, res) => {
     if (req.url.indexOf('/json') > -1) {
-      config.contentType = 'application/json';
+      config.contentType = 'application/json;';
       zlib.gzip(SUCC_TEXT, function(err, gzip) {
-          res.writeHead(200, {
-            'Content-Type': config.contentType,
-            'Content-Disposition': `attachment; filename="${filename}"`,
-            'Content-Encoding': 'gzip'
-          });
-          s.successText = SUCC_TEXT;
-          s.successTextGziped = gzip.toString();
-          res.end(gzip);
+        res.writeHead(200, {
+          'Content-Type': config.contentType,
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Encoding': 'gzip'
         });
+        s.successText = SUCC_TEXT;
+        s.successTextGziped = gzip.toString();
+        res.end(gzip);
+      });
     } else {
-      config.contentType = 'application/vnd.ms-excel';
+      // 注意，最后的 '; ' 是模拟错误的 contentType 场景
+      config.contentType = 'application/vnd.ms-excel;  ';
       fs.readFile(config.filePath, function(err, data) {
         zlib.gzip(data, function(err, gzip) {
           res.writeHead(200, {
