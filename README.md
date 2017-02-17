@@ -192,6 +192,9 @@ autoSameOriginRedirect
 
 # Release Note
 
+v1.0.3 2017-02-16
+    * catch inner error
+
 v1.0.2 2017-02-07
     * refactor readBody method of read-content.js
 
