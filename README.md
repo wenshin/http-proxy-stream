@@ -192,6 +192,9 @@ autoSameOriginRedirect
 
 # Release Note
 
+v1.1.0 2018-04-12
+    * support https proxy
+
 v1.0.3 2017-02-16
     * catch inner error
 
