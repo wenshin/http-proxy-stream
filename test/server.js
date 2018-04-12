@@ -1,4 +1,5 @@
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const zlib = require('zlib');
 const fs = require('fs');
@@ -13,10 +14,11 @@ exports.createMockServer = function createMockServer(config) {
     contentType: 'application/json; charset=utf-8',
     successText: SUCC_TEXT,
     failText: FAIL_TEXT,
-    port: PORT
+    port: PORT,
+    type: 'http'
   }, config || {});
 
-  const s = http.createServer((req, res) => {
+  const s = createServer((req, res) => {
     const matched = req.url.match(/status=(\d+)/i) || [];
     const status = matched[1] || 200;
     let content = config.successText;
@@ -38,7 +40,7 @@ exports.createMockServer = function createMockServer(config) {
       res.writeHead(status, s.headers);
       res.end(content);
     }
-  });
+  }, config.type, config);
   s.headers = {'content-type': config.contentType, test: 'test header'};
   s.successText = config.successText;
   s.failText = config.failText;
@@ -49,12 +51,13 @@ exports.createMockServer = function createMockServer(config) {
 exports.createMockFileServer = function createMockFileServer(config) {
   config = Object.assign({
     filePath: path.join(__dirname, '/assets/test.xlsx'),
-    port: PORT
+    port: PORT,
+    type: 'http'
   }, config || {});
 
   const filename = path.basename(config.filePath);
 
-  const s = http.createServer((req, res) => {
+  const s = createServer((req, res) => {
     if (req.url.indexOf('/json') > -1) {
       config.contentType = 'application/json;';
       zlib.gzip(SUCC_TEXT, function(err, gzip) {
@@ -84,7 +87,7 @@ exports.createMockFileServer = function createMockFileServer(config) {
       });
     }
     s.headers = {'content-type': config.contentType};
-  });
+  }, config.type, config);
   s.filename = filename;
   s.port = config.port;
   return s;
@@ -94,10 +97,11 @@ exports.createMockFileServer = function createMockFileServer(config) {
 exports.createRedirectServer = function createRedirectServer(config) {
   config = Object.assign({
     code: 301,
-    port: PORT
+    port: PORT,
+    type: 'http'
   }, config || {});
 
-  const s = http.createServer((req, res) => {
+  const s = createServer((req, res) => {
     if (req.url.indexOf('/redirected') > -1) {
       res.writeHead(200, {
         'content-type': 'text/plain'
@@ -109,9 +113,25 @@ exports.createRedirectServer = function createRedirectServer(config) {
       });
       res.end(null);
     }
-  });
+  }, config.type, config);
 
   s.successText = 'redirected';
   s.port = config.port;
+  return s;
+}
+
+exports.createServer = createServer;
+
+function createServer(handler, type, options) {
+  let s;
+  if (type === 'http') {
+    s = http.createServer(handler);
+  } else {
+    const opts = Object.assign({
+      key: fs.readFileSync(path.join(__dirname, 'assets/ca/key.pem')),
+      cert: fs.readFileSync(path.join(__dirname, 'assets/ca/cert.pem')),
+    }, options);
+    s = https.createServer(opts, handler);
+  }
   return s;
 }

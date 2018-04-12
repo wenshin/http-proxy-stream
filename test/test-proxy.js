@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const assert = require('assert');
 const stream = require('stream');
 const utils = require('./utils');
@@ -5,7 +7,7 @@ const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
 console.log(`test in ../${process.env.TEST_DIR || 'lib'}`)
 
 describe('proxy-request default', function () {
-  it('proxy(req, {url}, res)', function (done) {
+  it('proxy(req, {url}, res) http', function (done) {
     utils.test(function(req, res) {
       proxy(req, {url: `http://localhost:${this.address().port}`}, res)
     }, function() {
@@ -15,6 +17,24 @@ describe('proxy-request default', function () {
         assert.equal(body, ctx.s.successText);
         done()
       });
+    });
+  });
+
+  it('proxy(req, {url}, res) https', function (done) {
+    utils.test(function (req, res) {
+      proxy(req, {
+        url: `https://localhost:${this.address().port}`,
+        ca: fs.readFileSync(path.join(__dirname, 'assets/ca/cert.pem'))
+      }, res)
+    }, function () {
+      const ctx = this;
+      utils.get.call(this, null, function (res, body) {
+        assert.equal(res.statusCode, 200);
+        assert.equal(body, ctx.s.successText);
+        done()
+      });
+    }, {
+      type: 'https'
     });
   });
 

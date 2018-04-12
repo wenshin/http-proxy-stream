@@ -6,8 +6,10 @@ exports.test = function test(testCase, request, serverName, serverConfig) {
     serverConfig = serverName;
     serverName = 'createMockServer';
   }
+  // create target server
   const s = server[serverName](serverConfig);
 
+  // create proxy server
   s.server = http.createServer((req, res) => {
     s.listen(s.port, function() {
       this.s = s;
@@ -15,6 +17,7 @@ exports.test = function test(testCase, request, serverName, serverConfig) {
         testCase.call(this, req, res)
       } catch (e) {
         res.writeHead(500);
+        console.log('1111111', e)
         res.end('Test Case Fail');
       }
     });
@@ -24,14 +27,15 @@ exports.test = function test(testCase, request, serverName, serverConfig) {
   });
 };
 
-exports.get = function(options, handleEnd) {
+exports.get = function get(options, handleEnd) {
   const ctx = this;
   options = options || {
     path: '/',
     host: 'localhost',
     port: ctx.s.port - 1
   };
-  const get = http.get(options, function(res) {
+
+  const req = http.get(options, function (res) {
     let data = '';
     res.setEncoding('utf8')
     res.on('data', (chunk) => data += chunk);
@@ -41,10 +45,10 @@ exports.get = function(options, handleEnd) {
       handleEnd(res, data);
     });
   });
-  get.on('error', (err) => {
+  req.on('error', (err) => {
     ctx.s.server.close();
     ctx.s.close();
     console.log('get error', err)
   });
-  get.end();
+  req.end();
 }
