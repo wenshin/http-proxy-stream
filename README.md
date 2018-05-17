@@ -19,7 +19,9 @@ a proxy tool which damn convenient with stream pipe. also with 90+% test coverag
 - **request**: `http.IncomingMessage` instance or other instance of request.
 - **options**: `Object`, all options of http.request.
 - **options.url**: `String`, the target url with protocal and search part. like http://www.google.com?search=foo
-- **options.modifyResponse**: `Function(response)`, `Optional`, modify response before pipe to destination stream. accept one argument which is the body of response. the `this` keyword is reference of `request.Request` instance. the return value will be the new content of response.
+- **options.modifyResponse**: `Function(response)`, `Optional`,
+  modify response before pipe to destination stream. you can change the **reponse.body** and **response.headers**.
+  **response.body** have decoded to text, object, Buffer. the `this` keyword is reference of `request.Request` instance. you can return a promise.
 - **options.skipModifyResponse**: `Function(response)`, return true will skip modifyResponse.
 - **options.onResponse**: `Function(response)`, call once when http.ClientRequest emit 'response' event.
 - **options.cache**: `Boolean|Function(response)`, default false, if true will cache resopnse data for later usage. if function will call with response as first argument, return true will cache response.
@@ -107,6 +109,8 @@ http.createServer((req, res) => {
       response.headers['content-type'] = 'application/json; charset: utf8';
       // use new content, can be string, buffer, null, undefined or object;
       response.body = {content: body};
+      // can return a promise if necessary
+      // return Promise.resolve();
     }
   }, res);
 }).listen(8000);
@@ -191,6 +195,9 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+
+v1.2.0 2018-05-17
+    * modifyResponse support return promise
 
 v1.1.0 2018-04-12
     * support https proxy
