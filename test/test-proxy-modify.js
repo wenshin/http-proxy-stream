@@ -28,6 +28,31 @@ describe('proxy-request-modify', function () {
     });
   });
 
+  it('proxy(req, {url, modifyResponse}, res) modifyResponse return promise', function (done) {
+    const MODIFIED = 'modified';
+    utils.test(function (req, res) {
+      const ctx = this;
+      proxy(req, {
+        url: `http://localhost:${this.address().port}`,
+        modifyResponse(response) {
+          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          response.statusCode = 206;
+          response.headers.test = 'test';
+          response.body = MODIFIED;
+          return Promise.resolve();
+        }
+      }, res)
+        .catch(err => console.log(err));
+    }, function () {
+      utils.get.call(this, null, function (res, body) {
+        assert.equal(res.statusCode, 206);
+        assert.equal(body, MODIFIED);
+        assert.equal(res.headers.test, 'test');
+        done()
+      });
+    });
+  });
+
   it('proxy(req, {url, skipModifyResponse, modifyResponse}, res)', function (done) {
     const MODIFIED = 'modified';
     utils.test(function(req, res) {
