@@ -195,6 +195,9 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+v1.2.2 2018-05-28
+    * fix proxy https bug
+
 v1.2.1 2018-05-24
     * fix proxy https bug
 
