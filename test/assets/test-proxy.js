@@ -30,7 +30,7 @@ http.createServer((req, res) => {
   //   })
   //   .catch(err => console.log('catch error'))
   const areq = http.request({
-    hostname: 'www.baidu.com',
+    hostname: 'www.google.com',
     headers: Object.assign(req.headers, {host: null, connection: null})
   });
   areq.on('response', resp => {

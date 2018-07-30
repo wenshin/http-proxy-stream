@@ -8,11 +8,9 @@ const oldInitResponseProps = pr.initResponseProps;
 
 describe('proxy-request error', function () {
   it('modifyResponse is not function throw error', function () {
-    try {
+    assert.throws(() => {
       proxy({headers: {}, connection: {}}, {modifyResponse: 1})
-    } catch (err) {
-      assert.ok(err instanceof proxy.ProxyRequestError);
-    }
+    }, proxy.ProxyRequestError);
   });
 
   it('promise reject when modifyResponse throw error', function (done) {
