@@ -195,6 +195,9 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+v1.2.3 2018-07-30
+    * add host for ip request
+
 v1.2.2 2018-05-28
     * fix proxy https bug
 
