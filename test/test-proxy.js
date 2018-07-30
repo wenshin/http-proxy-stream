@@ -9,7 +9,7 @@ console.log(`test in ../${process.env.TEST_DIR || 'lib'}`)
 describe('proxy-request default', function () {
   it('proxy(req, {url}, res) http', function (done) {
     utils.test(function(req, res) {
-      proxy(req, {url: `http://localhost:${this.address().port}`}, res)
+      proxy(req, {url: `http://127.0.0.1:${this.address().port}`}, res)
     }, function() {
       const ctx = this;
       utils.get.call(this, null, function(res, body) {
