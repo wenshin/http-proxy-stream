@@ -195,6 +195,9 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+v1.2.5 2018-12-17
+    * remove request dependency
+
 v1.2.4 2018-07-30
     * add host for ip request
 
