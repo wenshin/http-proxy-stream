@@ -2,7 +2,7 @@ const http = require('http');
 const proxy = require('../../lib/');
 const fs = require('fs');
 const assert = require('assert');
-const request = require('request');
+// const request = require('request');
 
 const file = fs.readFileSync('./test.xlsx');
 
