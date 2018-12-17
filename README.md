@@ -195,6 +195,9 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+v1.2.6 2018-12-17
+    * clean listeners of cache stream when call resetReadable
+
 v1.2.5 2018-12-17
     * remove request dependency
 
