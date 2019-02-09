@@ -183,6 +183,28 @@ http.createServer((req, res) => {
 }).listen(8000);
 ```
 
+### Cache requests in memory for reusing
+some times we can cache some request in memory if data are not always change.
+
+
+```javascript
+let cached = {};
+http.createServer((req, res) => {
+  if (cached[req.url]) {
+    return proxy.retrieveResponseStream(cached[url]).pipe(res);
+  }
+  proxy(req, {
+    url: `http://www.google.com${req.url}`,
+    cache(response) {
+      // only when the content is text type, cache the data
+      return proxy.isText(response.contentType.type);
+    }
+  }).then(resp => {
+      cached[req.url] = resp;
+      resp.pipe(res);
+    });
+}).listen(8000);
+```
 
 ### Auto Redirect
 autoSameOriginRedirect
@@ -195,6 +217,11 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+v1.3.0 2019-01-09
+    * update package.json
+    * fix some bugs
+    * add retrieveResponseStream method to support caching requests in memory
+
 v1.2.6 2018-12-17
     * clean listeners of cache stream when call resetReadable
 
