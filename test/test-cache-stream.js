@@ -1,5 +1,4 @@
 const assert = require('assert');
-const utils = require('./utils');
 const stream = require('stream');
 const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
 
