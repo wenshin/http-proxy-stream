@@ -217,6 +217,9 @@ autoSameOriginRedirect
     $> npm publish
 
 # Release Note
+v1.3.1 2019-01-09
+    * fix `retrieveResponseStream` from `CacheStream` which is writing bug
+
 v1.3.0 2019-01-09
     * update package.json
     * fix some bugs
