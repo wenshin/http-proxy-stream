@@ -32,7 +32,7 @@ exports.createMockServer = function createMockServer(config) {
 
     if (config.delay) {
       setTimeout(() => {
-        console.log('timeout response', config.delay)
+        console.log('[TEST SERVEF] timeout response', config.delay)
         res.writeHead(status, s.headers);
         res.end(content);
       }, config.delay)

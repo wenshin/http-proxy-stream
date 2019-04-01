@@ -49,4 +49,18 @@ describe('retrieveResponseStream', () => {
       done();
     });
   });
+
+  it('retrieveResponseStream with writing data', function (done) {
+    const cStream = new proxy.CacheStream();
+    const ws = new TestWritableStream();
+    cStream.headers = {};
+    setTimeout(() => cStream.write('中文 '), 20);
+    setTimeout(() => cStream.end('end'), 40);
+    const res = proxy.retrieveResponseStream(cStream);
+    res.pipe(ws);
+    ws.on('finish', () => {
+      assert.equal(ws.chunks.length, 2);
+      done();
+    });
+  });
 });
