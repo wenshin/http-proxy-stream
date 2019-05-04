@@ -144,6 +144,24 @@ describe('proxy-request default', function () {
     }, 'createMockFileServer', {isChunked: false});
   });
 
+  it('proxy(req, {url, modifyResponse}, res) set invalid header in modify response', function (done) {
+    const INVALID_HEADER = '/path/to?q=中国';
+    utils.test(function(req, res) {
+      proxy(req, {
+        url: `http://localhost:${this.address().port}/json`,
+        modifyResponse(response) {
+          response.headers.test = INVALID_HEADER;
+        }
+      }, res).catch(err => console.log(err));
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, function(res) {
+        assert.equal(res.headers['test'], encodeURI(INVALID_HEADER));
+        done()
+      });
+    }, 'createMockFileServer', {isChunked: false});
+  });
+
   it('proxy(req, {url}, res) will keep content-encoding gzip', function (done) {
     utils.test(function(req, res) {
       proxy(req, {url: `http://localhost:${this.address().port}`}, res)
