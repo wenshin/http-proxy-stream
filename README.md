@@ -52,7 +52,7 @@ then value of 'Content-Encoding' header
 const proxy = require('http-proxy-stream');
 const http = require('http');
 
-// http useage
+// http usage
 http.createServer((req, res) => {
   proxy(req, {
     url: `http://www.google.com${req.url}`,
@@ -216,7 +216,14 @@ autoSameOriginRedirect
     $> npm test
     $> npm publish
 
+## Debug Test
+
+    $> npm run debug-test
+
 # Release Note
+v1.3.2 2019-05-04
+    * fix https://github.com/nodejs/node/blob/v8.11.1/lib/_http_outgoing.js#L494 error
+
 v1.3.1 2019-01-09
     * fix `retrieveResponseStream` from `CacheStream` which is writing bug
 
