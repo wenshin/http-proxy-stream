@@ -9,12 +9,12 @@ console.log(`test in ../${process.env.TEST_DIR || 'lib'}`)
 describe('proxy-request default', function () {
   it('proxy(req, {url}, res) http', function (done) {
     utils.test(function(req, res) {
-      proxy(req, {url: `http://127.0.0.1:${this.address().port}`}, res)
+      proxy(req, {url: `http://127.0.0.1:${this.upstream.port}`}, res)
     }, function() {
       const ctx = this;
       utils.get.call(this, null, function(res, body) {
         assert.equal(res.statusCode, 200);
-        assert.equal(body, ctx.s.successText);
+        assert.equal(body, ctx.upstream.successText);
         done()
       });
     });
@@ -23,14 +23,14 @@ describe('proxy-request default', function () {
   it('proxy(req, {url}, res) https', function (done) {
     utils.test(function (req, res) {
       proxy(req, {
-        url: `https://localhost:${this.address().port}`,
+        url: `https://localhost:${this.upstream.port}`,
         ca: fs.readFileSync(path.join(__dirname, 'assets/ca/cert.pem'))
       }, res)
     }, function () {
       const ctx = this;
       utils.get.call(this, null, function (res, body) {
         assert.equal(res.statusCode, 200);
-        assert.equal(body, ctx.s.successText);
+        assert.equal(body, ctx.upstream.successText);
         done()
       });
     }, {
@@ -40,7 +40,7 @@ describe('proxy-request default', function () {
 
   it('proxy(req, {url}).then(response => response.pipe(res))', function (done) {
     utils.test(function(req, res) {
-      const port = this.address().port;
+      const port = this.upstream.port;
       proxy(req, {
         url: `http://localhost:${port}`,
         cache(resp) {
@@ -62,10 +62,10 @@ describe('proxy-request default', function () {
     }, function() {
       const ctx = this;
       utils.get.call(this, null, function(res, body) {
-        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
+        assert.equal(res.headers['content-type'], ctx.upstream.headers['content-type']);
         assert.ok(!res.headers['content-length']);
         assert.equal(res.statusCode, 200);
-        assert.equal(body, ctx.s.successText);
+        assert.equal(body, ctx.upstream.successText);
         done()
       });
     });
@@ -75,9 +75,9 @@ describe('proxy-request default', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         onResponse(response) {
-          assert.equal(response.headers['content-length'], ctx.s.successText.length);
+          assert.equal(response.headers['content-length'], ctx.upstream.successText.length);
           response.headers.test = 'test';
         }
       })
@@ -89,10 +89,9 @@ describe('proxy-request default', function () {
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
-        assert.equal(res.headers['transfer-encoding'], 'chunked');
-        assert.ok(!res.headers['content-length']);
+        assert.equal(res.headers['content-length'], ctx.upstream.successText.length);
         assert.equal(res.statusCode, 200);
-        assert.equal(body, ctx.s.successText);
+        assert.equal(body, ctx.upstream.successText);
         assert.equal(res.headers.test, 'test');
         done()
       });
@@ -102,7 +101,7 @@ describe('proxy-request default', function () {
   it('proxy(req, {url, modifyResponse}, res)', function (done) {
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         modifyResponse() {
           return;
         }
@@ -110,12 +109,11 @@ describe('proxy-request default', function () {
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
-        assert.equal(res.headers['transfer-encoding'], 'chunked');
         assert.ok(!res.headers['content-encoding']);
-        assert.ok(!res.headers['content-length']);
-        assert.deepEqual(JSON.parse(body), JSON.parse(ctx.s.successText));
+        assert.ok(res.headers['content-length']);
+        assert.deepEqual(JSON.parse(body), JSON.parse(ctx.upstream.successText));
         assert.equal(res.statusCode, 200);
-        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
+        assert.equal(res.headers['content-type'], ctx.upstream.headers['content-type']);
         done()
       });
     }, {isChunked: false});
@@ -124,7 +122,7 @@ describe('proxy-request default', function () {
   it('proxy(req, {url, modifyResponse}, res) unziped stream will not have content-encoding gzip', function (done) {
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}/json`,
+        url: `http://localhost:${this.upstream.port}/json`,
         modifyResponse(response) {
           response.headers.test = 'test';
         }
@@ -132,12 +130,11 @@ describe('proxy-request default', function () {
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
-        assert.equal(res.headers['transfer-encoding'], 'chunked');
         assert.ok(!res.headers['content-encoding']);
-        assert.ok(!res.headers['content-length']);
-        assert.deepEqual(JSON.parse(body), JSON.parse(ctx.s.successText));
+        assert.ok(res.headers['content-length']);
+        assert.deepEqual(JSON.parse(body), JSON.parse(ctx.upstream.successText));
         assert.equal(res.statusCode, 200);
-        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
+        assert.equal(res.headers['content-type'], ctx.upstream.headers['content-type']);
         assert.equal(res.headers.test, 'test');
         done()
       });
@@ -148,7 +145,7 @@ describe('proxy-request default', function () {
     const INVALID_HEADER = '/path/to?q=中国';
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}/json`,
+        url: `http://localhost:${this.upstream.port}/json`,
         modifyResponse(response) {
           response.headers.test = INVALID_HEADER;
         }
@@ -162,9 +159,9 @@ describe('proxy-request default', function () {
     }, 'createMockFileServer', {isChunked: false});
   });
 
-  it('proxy(req, {url}, res) will keep content-encoding gzip', function (done) {
+  it('proxy(req, {url}, res) will keep content-encoding gzip without modifyResponse config', function (done) {
     utils.test(function(req, res) {
-      proxy(req, {url: `http://localhost:${this.address().port}`}, res)
+      proxy(req, {url: `http://localhost:${this.upstream.port}`}, res)
         .catch(err => console.log(err));
     }, function() {
       const ctx = this;
@@ -172,8 +169,8 @@ describe('proxy-request default', function () {
         assert.ok(!res.headers['content-length']);
         assert.equal(res.headers['transfer-encoding'], 'chunked');
         assert.equal(res.headers['content-encoding'], 'gzip');
-        assert.equal(res.headers['content-type'], ctx.s.headers['content-type']);
-        assert.equal(body, ctx.s.successTextGziped);
+        assert.equal(res.headers['content-type'], ctx.upstream.headers['content-type']);
+        assert.equal(body, ctx.upstream.successTextGziped);
         assert.equal(res.statusCode, 200);
         done()
       });
@@ -183,7 +180,7 @@ describe('proxy-request default', function () {
   it('proxy(req, {url}, res) timeout', function (done) {
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         timeout: 10
       }, res)
         .catch(err => {
@@ -198,5 +195,22 @@ describe('proxy-request default', function () {
         done()
       });
     }, {delay: 50});
+  });
+
+  it('proxy(req, {url}, res) upstream server abort', function (done) {
+    utils.test(function(req, res) {
+      proxy(req, {
+        url: `http://localhost:${this.upstream.port}`
+      }).then((resp) => {
+        resp.pipe(res);
+        resp.emit('aborted');
+      })
+    }, function() {
+      const ctx = this;
+      utils.get.call(ctx, null, null, function(err) {
+        assert.ok(err);
+        done()
+      });
+    });
   });
 });

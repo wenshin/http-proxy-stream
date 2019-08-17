@@ -7,32 +7,34 @@ exports.test = function test(testCase, request, serverName, serverConfig) {
     serverName = 'createMockServer';
   }
   // create target server
-  const s = server[serverName](serverConfig);
+  const upstream = server[serverName](serverConfig);
 
   // create proxy server
-  s.server = http.createServer((req, res) => {
-    s.listen(s.port, function() {
-      this.s = s;
+  const proxy = http.createServer((req, res) => {
+    upstream.listen(0, function() {
+      upstream.port = upstream.address().port;
+      const ctx = { proxy, upstream }
       try {
-        testCase.call(this, req, res)
-      } catch (e) {
+        testCase.call(ctx, req, res)
+      } catch (err) {
         res.writeHead(500);
-        console.log('1111111', e)
+        console.log('testCase error', err)
         res.end('Test Case Fail');
       }
     });
-  }).listen(s.port - 1, function() {
-    this.s = s;
-    request.call(this);
+  }).listen(0, function() {
+    const ctx = { proxy, upstream}
+    proxy.port = proxy.address().port;
+    request.call(ctx);
   });
 };
 
-exports.get = function get(options, handleEnd) {
+exports.get = function get(options, handleEnd, handleError) {
   const ctx = this;
   options = options || {
     path: '/',
     host: 'localhost',
-    port: ctx.s.port - 1
+    port: ctx.proxy.port
   };
 
   const req = http.get(options, function (res) {
@@ -40,15 +42,15 @@ exports.get = function get(options, handleEnd) {
     res.setEncoding('utf8')
     res.on('data', (chunk) => data += chunk);
     res.on('end', () => {
-      ctx.s.server.close();
-      ctx.s.close();
-      handleEnd(res, data);
+      ctx.proxy.close();
+      ctx.upstream.close();
+      handleEnd && handleEnd(res, data);
     });
   });
   req.on('error', (err) => {
-    ctx.s.server.close();
-    ctx.s.close();
-    console.log('get error', err)
+    ctx.proxy.close();
+    ctx.upstream.close();
+    handleError ? handleError(err) : console.log('get error', err);
   });
   req.end();
 }

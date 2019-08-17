@@ -9,9 +9,9 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         modifyResponse(response) {
-          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          assert.deepEqual(response.body, JSON.parse(ctx.upstream.successText));
           response.statusCode = 206;
           response.headers.test = 'test';
           response.body = MODIFIED;
@@ -33,9 +33,9 @@ describe('proxy-request-modify', function () {
     utils.test(function (req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         modifyResponse(response) {
-          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          assert.deepEqual(response.body, JSON.parse(ctx.upstream.successText));
           response.statusCode = 206;
           response.headers.test = 'test';
           response.body = MODIFIED;
@@ -58,12 +58,12 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         skipModifyResponse(response) {
           return !proxy.mime.isText(response.contentType.type);
         },
         modifyResponse(response) {
-          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          assert.deepEqual(response.body, JSON.parse(ctx.upstream.successText));
           response.statusCode = 206;
           response.headers.test = 'test';
           response.body = MODIFIED;
@@ -84,12 +84,12 @@ describe('proxy-request-modify', function () {
     const modified = {a: 1};
     utils.test(function(req, res) {
       const ctx = this;
-      const port = this.address().port;
+      const port = ctx.upstream.port;
       proxy(req, {
         url: `http://localhost:${port}`,
         cache: true,
         modifyResponse(response) {
-          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          assert.deepEqual(response.body, JSON.parse(ctx.upstream.successText));
           response.statusCode = 206;
           response.headers.test = 'test';
           response.body = modified;
@@ -119,12 +119,12 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         onResponse(response) {
           response.headers.test = 'test';
         },
         modifyResponse(response) {
-          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          assert.deepEqual(response.body, JSON.parse(ctx.upstream.successText));
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
           response.body = MODIFIED;
@@ -146,12 +146,12 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         onResponse(response) {
           response.headers.test = 'test';
         },
         modifyResponse(response) {
-          assert.deepEqual(response.body, JSON.parse(ctx.s.successText));
+          assert.deepEqual(response.body, JSON.parse(ctx.upstream.successText));
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
           response.body = MODIFIED;
@@ -161,6 +161,7 @@ describe('proxy-request-modify', function () {
     }, function() {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
+        assert.equal(res.headers['content-length'], MODIFIED.length);
         assert.equal(res.statusCode, 206);
         assert.equal(body, MODIFIED);
         assert.equal(res.headers.test, 'test');
@@ -179,10 +180,10 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         modifyResponse(response) {
           assert.equal(typeof response.body, 'string');
-          assert.equal(response.body, ctx.s.successText);
+          assert.equal(response.body, ctx.upstream.successText);
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
           response.body = MODIFIED;
@@ -207,9 +208,9 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         modifyResponse(response) {
-          assert.ok(response.body.equals(ctx.s.successText), 'instanceof Buffer and equal');
+          assert.ok(response.body.equals(ctx.upstream.successText), 'instanceof Buffer and equal');
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
           response.statusMessage = 'TEST';
@@ -236,9 +237,9 @@ describe('proxy-request-modify', function () {
     utils.test(function(req, res) {
       const ctx = this;
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${ctx.upstream.port}`,
         modifyResponse(response) {
-          assert.ok(response.body.equals(ctx.s.successText), 'instanceof Buffer and equal');
+          assert.ok(response.body.equals(ctx.upstream.successText), 'instanceof Buffer and equal');
           assert.equal(res.statusCode, 200);
           response.statusCode = 206;
           response.body = null;
@@ -257,7 +258,7 @@ describe('proxy-request-modify', function () {
   it('response content type is excel will not stringify buffer', function (done) {
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         modifyResponse(response) {
           assert.ok(response.body instanceof Buffer);
         }
@@ -266,7 +267,7 @@ describe('proxy-request-modify', function () {
       const ctx = this;
       utils.get.call(ctx, null, function(res, body) {
         assert.equal(res.statusCode, 200);
-        assert.equal(body, ctx.s.successText);
+        assert.equal(body, ctx.upstream.successText);
         done()
       });
     }, 'createMockFileServer');

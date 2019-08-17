@@ -16,7 +16,7 @@ describe('proxy-request error', function () {
   it('promise reject when modifyResponse throw error', function (done) {
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         modifyResponse() {
           throw new Error('test');
         }
@@ -41,7 +41,7 @@ describe('proxy-request error', function () {
   it('promise reject when options.onResponse error', function (done) {
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         onResponse() {
           throw new Error('test response');
         }
@@ -65,7 +65,7 @@ describe('proxy-request error', function () {
 
     utils.test(function(req, res) {
       proxy(req, {
-        url: `http://localhost:${this.address().port}`,
+        url: `http://localhost:${this.upstream.port}`,
         onResponse() {
           throw new Error('test response');
         }

@@ -1,6 +1,7 @@
 const assert = require('assert');
 const stream = require('stream');
 const proxy = require(`../${process.env.TEST_DIR || 'lib'}`);
+const { copyResponseMeta, hackResponsePipe } = require(`../${process.env.TEST_DIR || 'lib'}/post-response`);
 
 
 class TestWritableStream extends stream.Writable {
@@ -39,6 +40,15 @@ class TestAsyncReableStream extends stream.Readable {
       }
     }, 5);
   }
+}
+
+function createMockAsyncResponse(headers = {}, status = 200) {
+  const res = new TestAsyncReableStream();
+  res.statusCode = status;
+  res.headers = Object.assign({
+    'content-length': 20
+  }, headers);
+  return res;
 }
 
 
@@ -136,9 +146,55 @@ describe('CacheStream', function () {
     setTimeout(() => {
       cStream.pipe(ws);
       ws.on('finish', () => {
+        assert.ok(cStream.isCacheValid())
         assert.equal(ws.chunks.length, CHUNK_COUNT);
         done();
       });
     }, 10);
+  });
+
+  it('CacheStream.isCacheValid() === true when upstream set content-length', function (done) {
+    const cStream = new proxy.CacheStream();
+    cStream.name = 'pipeReadable';
+
+    const rs = createMockAsyncResponse();
+    hackResponsePipe(rs);
+
+    rs.pipe(cStream);
+    cStream.on('finish', () => {
+      assert.ok(cStream.isCacheValid());
+      done();
+    });
+  });
+
+  it('CacheStream.isCacheValid() === false upstream server abort', function (done) {
+    const cStream = new proxy.CacheStream();
+    cStream.name = 'pipeReadable';
+    cStream.on('aborted', () => {
+      assert.ok(!cStream.isCacheValid());
+      done();
+    });
+
+    const rs = createMockAsyncResponse();
+    hackResponsePipe(rs);
+
+    rs.pipe(cStream);
+    rs.emit('aborted');
+  });
+
+  it('CacheStream.isCacheValid() === false of content-length check fail', function (done) {
+    const cStream = new proxy.CacheStream();
+    cStream.name = 'pipeReadable';
+
+    const rs = createMockAsyncResponse({
+      'content-length': 10
+    });
+    hackResponsePipe(rs);
+
+    rs.pipe(cStream);
+    cStream.on('finish', () => {
+      assert.ok(!cStream.isCacheValid())
+      done();
+    });
   });
 });

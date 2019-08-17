@@ -4,7 +4,6 @@ const path = require('path');
 const zlib = require('zlib');
 const fs = require('fs');
 
-const PORT = 8777;
 const SUCC_TEXT = '{"success": true}';
 const FAIL_TEXT = '{"success": false}';
 
@@ -14,7 +13,6 @@ exports.createMockServer = function createMockServer(config) {
     contentType: 'application/json; charset=utf-8',
     successText: SUCC_TEXT,
     failText: FAIL_TEXT,
-    port: PORT,
     type: 'http'
   }, config || {});
 
@@ -32,7 +30,7 @@ exports.createMockServer = function createMockServer(config) {
 
     if (config.delay) {
       setTimeout(() => {
-        console.log('[TEST SERVEF] timeout response', config.delay)
+        console.log('[TEST SERVER] timeout response', config.delay)
         res.writeHead(status, s.headers);
         res.end(content);
       }, config.delay)
@@ -44,14 +42,12 @@ exports.createMockServer = function createMockServer(config) {
   s.headers = {'content-type': config.contentType, test: 'test header'};
   s.successText = config.successText;
   s.failText = config.failText;
-  s.port = config.port;
   return s;
 }
 
 exports.createMockFileServer = function createMockFileServer(config) {
   config = Object.assign({
     filePath: path.join(__dirname, '/assets/test.xlsx'),
-    port: PORT,
     type: 'http'
   }, config || {});
 
@@ -89,7 +85,6 @@ exports.createMockFileServer = function createMockFileServer(config) {
     s.headers = {'content-type': config.contentType};
   }, config.type, config);
   s.filename = filename;
-  s.port = config.port;
   return s;
 }
 
@@ -97,7 +92,6 @@ exports.createMockFileServer = function createMockFileServer(config) {
 exports.createRedirectServer = function createRedirectServer(config) {
   config = Object.assign({
     code: 301,
-    port: PORT,
     type: 'http'
   }, config || {});
 
@@ -116,7 +110,6 @@ exports.createRedirectServer = function createRedirectServer(config) {
   }, config.type, config);
 
   s.successText = 'redirected';
-  s.port = config.port;
   return s;
 }
 
