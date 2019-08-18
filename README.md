@@ -221,6 +221,11 @@ autoSameOriginRedirect
     $> npm run debug-test
 
 # Release Note
+v1.3.3 2019-08-18
+    * not remove content-length header property
+    * deal with client and upstream abort
+    * run test pass
+
 v1.3.2 2019-05-04
     * fix https://github.com/nodejs/node/blob/v8.11.1/lib/_http_outgoing.js#L494 error
 
