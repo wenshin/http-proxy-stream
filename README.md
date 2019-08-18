@@ -221,6 +221,9 @@ autoSameOriginRedirect
     $> npm run debug-test
 
 # Release Note
+v1.3.4 2019-08-18
+    * fix CacheStream.isCacheValid bug
+
 v1.3.3 2019-08-18
     * not remove content-length header property
     * deal with client and upstream abort

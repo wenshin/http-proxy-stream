@@ -1,6 +1,6 @@
 {
   "name": "http-proxy-stream",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "engines": {
     "node": ">=6.1.0"
   },
